@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>신청하기 - Paycollabo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: #f5f5f5;
+      /* 하단 버튼 높이만큼 여백 확보 */
+      padding-bottom: 72px;
+    }
+
+    /* Tally 폼을 꽉 차게 */
+    iframe {
+      display: block;
+      width: 100%;
+      min-height: 100vh;
+      border: none;
+      background: #fff;
+    }
+
+    /* ───── 하단 고정 버튼 ───── */
+    .cta-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.10);
+      z-index: 9999;
+    }
+
+    .cta-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      background: #FEE500;
+      color: #191919;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .cta-btn:active {
+      background: #f0d900;
+      transform: scale(0.98);
+    }
+
+    /* 카카오 말풍선 아이콘 */
+    .kakao-icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Tally 폼 (iframe embed) -->
+  <iframe
+    src="https://tally.so/embed/A7lMdk?alignLeft=1&hideTitle=0&transparentBackground=0&dynamicHeight=1"
+    loading="lazy"
+    title="신청 폼"
+    allowfullscreen
+  ></iframe>
+
+  <!-- 하단 고정 카카오톡 신청 버튼 -->
+  <div class="cta-bar">
+    <a href="http://pf.kakao.com/_HTPHn/chat" target="_blank" rel="noopener" class="cta-btn">
+      <!-- 카카오 말풍선 SVG 아이콘 -->
+      <svg class="kakao-icon" viewBox="0 0 24 24" fill="#191919" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.567 1.522 4.822 3.836 6.196L4.5 21l4.763-2.382C10.077 18.862 11.021 19 12 19c5.523 0 10-3.477 10-7.5S17.523 3 12 3z"/>
+      </svg>
+      카카오톡으로 바로 문의하기
+    </a>
+  </div>
+
+</body>
+</html>
