@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CTA 버튼 테스트</title>
+  <style>
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: #f5f5f5;
+      padding-bottom: 100px;
+      min-height: 200vh; /* 스크롤 테스트용 */
+    }
+
+    .dummy-content {
+      padding: 40px 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      color: #333;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    /* ───────────────────────────────
+       하단 고정 CTA 바
+    ─────────────────────────────── */
+    .cta-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 9999;
+      background: #fff;
+      box-shadow: 0 -2px 20px rgba(0,0,0,0.12);
+      padding: 10px 16px 14px;
+    }
+
+    .cta-inner {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* 타이머 + 할인 정보 줄 */
+    .cta-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    /* 카운트다운 타이머 */
+    .timer-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timer-label {
+      font-size: 12px;
+      color: #e03131;
+      font-weight: 700;
+      animation: blink 1.2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    .timer-digits {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .timer-block {
+      display: flex;
+      align-items: baseline;
+      gap: 1px;
+    }
+
+    .timer-unit {
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      min-width: 26px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-suffix {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .timer-colon {
+      color: #bbb;
+      font-size: 11px;
+    }
+
+    /* 할인율 배지 */
+    .discount-badge {
+      background: #e03131;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    /* 가격 표시 */
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .price-original {
+      font-size: 12px;
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .price-sale {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1a1a1a;
+    }
+
+    /* 카카오 버튼 */
+    .cta-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px;
+      background: #FEE500;
+      color: #191919;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    .cta-btn:active {
+      background: #f0d900;
+      transform: scale(0.98);
+    }
+
+    .kakao-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* 마감 시 버튼 비활성화 스타일 */
+    .cta-btn.expired {
+      background: #ccc;
+      color: #888;
+      pointer-events: none;
+    }
+
+    .expired-msg {
+      text-align: center;
+      font-size: 13px;
+      color: #999;
+      margin-top: 6px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dummy-content">
+    <h2>상세페이지 영역</h2>
+    <p>스크롤을 내려도 하단 버튼이 고정되어 있는지 확인해보세요.</p>
+  </div>
+
+  <!-- ───── 하단 고정 CTA 바 ───── -->
+  <div class="cta-bar">
+    <div class="cta-inner">
+
+      <div class="cta-top">
+        <!-- 카운트다운 타이머 -->
+        <div class="timer-wrap">
+          <span class="timer-label">⏰ 마감 임박!</span>
+          <div class="timer-digits">
+            <span class="timer-block"><span class="timer-unit" id="t-days">000</span><span class="timer-suffix">일</span></span>
+            <span class="timer-colon"> </span>
+            <span class="timer-block"><span class="timer-unit" id="t-hours">00</span><span class="timer-suffix">시간</span></span>
+            <span class="timer-colon"> </span>
+            <span class="timer-block"><span class="timer-unit" id="t-minutes">00</span><span class="timer-suffix">분</span></span>
+            <span class="timer-colon"> </span>
+            <span class="timer-block"><span class="timer-unit" id="t-seconds">00</span><span class="timer-suffix">초</span></span>
+          </div>
+        </div>
+
+        <!-- 할인율 배지 -->
+        <!-- ★ 수정: 숫자만 바꾸세요 -->
+        <span class="discount-badge">30% 할인</span>
+      </div>
+
+      <!-- 가격 표시 -->
+      <!-- ★ 수정: 가격 숫자만 바꾸세요 -->
+      <div class="price-row">
+        <span class="price-original">100,000원</span>
+        <span class="price-sale">70,000원</span>
+      </div>
+
+      <!-- 카카오 버튼 -->
+      <!-- ★ 수정: href의 카카오 링크만 바꾸세요 -->
+      <a href="http://pf.kakao.com/_HTPHn/chat" target="_blank" rel="noopener" class="cta-btn" id="cta-btn">
+        <svg class="kakao-icon" viewBox="0 0 24 24" fill="#191919">
+          <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.567 1.522 4.822 3.836 6.196L4.5 21l4.763-2.382C10.077 18.862 11.021 19 12 19c5.523 0 10-3.477 10-7.5S17.523 3 12 3z"/>
+        </svg>
+        지금 신청하기
+      </a>
+
+      <div class="expired-msg" id="expired-msg">⛔ 이벤트가 종료되었습니다.</div>
+    </div>
+  </div>
+
+  <script>
+    // ★★★ 여기만 수정하면 됩니다 ★★★
+    // 마감 날짜/시간 설정 (년, 월-1, 일, 시, 분, 초)
+    // 월은 0부터 시작: 1월=0, 2월=1 ... 12월=11
+    const DEADLINE = new Date(2026, 11, 31, 23, 59, 59); // 테스트용: 2026년 12월 31일 23:59:59
+    // ★★★★★★★★★★★★★★★★★★★★★★
+
+    function updateTimer() {
+      const now = new Date();
+      const diff = DEADLINE - now;
+
+      if (diff <= 0) {
+        // 마감 처리
+        document.getElementById('t-hours').textContent   = '00';
+        document.getElementById('t-minutes').textContent = '00';
+        document.getElementById('t-seconds').textContent = '00';
+        document.getElementById('cta-btn').classList.add('expired');
+        document.getElementById('cta-btn').textContent = '이벤트 종료';
+        document.getElementById('expired-msg').style.display = 'block';
+        return;
+      }
+
+      const days    = Math.floor(diff / 1000 / 60 / 60 / 24);
+      const hours   = Math.floor((diff / 1000 / 60 / 60) % 24);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      document.getElementById('t-days').textContent    = String(days).padStart(2, '0');
+      document.getElementById('t-hours').textContent   = String(hours).padStart(2, '0');
+      document.getElementById('t-minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('t-seconds').textContent = String(seconds).padStart(2, '0');
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  </script>
+
+</body>
+</html>
