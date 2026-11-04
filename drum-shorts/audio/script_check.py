@@ -283,26 +283,40 @@ li.err{{color:var(--err);font-weight:700}}
 </main></body></html>"""
 
 
+def build_txt(tl, scenes):
+    lines = [f"{plain(tl['title'])} 대본",
+             f"{tl['bpm']:g} BPM · 스윙 {tl['swingMs']:g}ms · 전체 {tl['totalSec']:.1f}초", ""]
+    for i, s in enumerate(scenes):
+        sc = s["scene"]
+        tag = " (안내 박스)" if sc["cta"] else ""
+        lines.append(f"[{i + 1}] {sc['name']}  {sc['start']:.1f}~{sc['end']:.1f}초{tag}")
+        lines += [plain(x) for x in (sc["cta"] or (sc["caption"] or "").split("\n"))]
+        lines.append("")
+    return "\n".join(lines)
+
+
 def main():
-    gdir, tl_path, stills, out = map(Path, sys.argv[1:5])
-    frames = [int(x) for x in sys.argv[5].split(",")]
-    cfg = json.loads((gdir / "config.json").read_text(encoding="utf-8"))
+    # script_check.py <장르 폴더> <timeline.json> <출력 파일(.txt 또는 .html)> [캡처 폴더] [프레임들]
+    gdir, tl_path, out = map(Path, sys.argv[1:4])
     tl = json.loads(tl_path.read_text(encoding="utf-8"))
     metrics = Metrics(FONT)
     global_res, scenes = run_checks(tl, metrics)
-    out.write_text(build_html(cfg, tl, global_res, scenes, stills, frames), encoding="utf-8")
+    if out.suffix == ".html":
+        cfg = json.loads((gdir / "config.json").read_text(encoding="utf-8"))
+        frames = [int(x) for x in sys.argv[5].split(",")]
+        out.write_text(build_html(cfg, tl, global_res, scenes, Path(sys.argv[4]), frames), encoding="utf-8")
+    else:
+        out.write_text(build_txt(tl, scenes), encoding="utf-8")
 
-    print("\n===== 대본 확인 =====")
-    for r in global_res:
-        print(f"  [{r[0]}] {r[1]}")
+    issues = [(k, m, None) for k, m in global_res if k != OK]
     for i, s in enumerate(scenes):
-        sc = s["scene"]
-        print(f"\n{i + 1}. {sc['name']} ({sc['start']:.1f}~{sc['end']:.1f}초)")
-        print("   " + " / ".join(plain(x) for x in (sc["cta"] or (sc["caption"] or "").split("\n"))))
-        for k, m in s["results"]:
-            if k != OK:
-                print(f"   [{'수정' if k == ERR else '확인'}] {m}")
-    print(f"\n확인 화면 → {out}")
+        issues += [(k, m, i + 1) for k, m in s["results"] if k != OK]
+    print("\n===== 자동 검사 =====")
+    if not issues:
+        print("  문제 없음")
+    for k, m, n in issues:
+        print(f"  [{'수정' if k == ERR else '확인'}] " + (f"{n}번 " if n else "") + m)
+    print(f"\n대본 → {out}")
 
 
 if __name__ == "__main__":
