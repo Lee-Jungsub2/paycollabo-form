@@ -16,7 +16,7 @@ import numpy as np
 import soundfile as sf
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from textfit import Metrics, fit_caption, fit_cta  # noqa: E402
+from textfit import Metrics, fit_caption, fit_cta, fit_title, style_of  # noqa: E402
 
 SR = 48000
 FPS = 30
@@ -153,7 +153,9 @@ def main():
 
     # 장면 → 시간표 + 이벤트
     scenes_out, events, t0 = [], [], 0.0
-    metrics = Metrics()
+    style = cfg.get("style", "tech")
+    st = style_of(style)
+    metrics = Metrics(st["font"], fallback="Jua-Regular.ttf")
     max_progress = 0
     for i, sc in enumerate(cfg["scenes"]):
         bars = int(sc.get("bars", 1))
@@ -180,6 +182,7 @@ def main():
         cta = [fill(x, cfg) for x in sc["cta"]] if sc.get("cta") else None
         scenes_out.append({
             "name": sc.get("name", f"장면{i + 1}"),
+            "tag": sc.get("tag", sc.get("name", f"장면{i + 1}")),
             "start": round(t0, 6),
             "end": round(t0 + bars * bar_sec, 6),
             "bars": bars,
@@ -191,8 +194,8 @@ def main():
             "showSwingLabel": bool(sc.get("show_swing_label", False)),
             "caption": caption,
             "cta": cta,
-            "captionSize": fit_caption(metrics, caption.split("\n")) if caption else None,
-            "ctaSizes": fit_cta(metrics, cta) if cta else None,
+            "captionSize": fit_caption(metrics, caption.split("\n"), st) if caption else None,
+            "ctaSizes": fit_cta(metrics, cta, st) if cta else None,
         })
         t0 += bars * bar_sec
 
@@ -220,7 +223,9 @@ def main():
         "bpm": bpm, "barSec": bar_sec, "stepSec": step_sec,
         "swingMs": float(cfg.get("swing_ms", 0)), "swingSec": swing_sec,
         "barsInPattern": bars_in_pattern,
-        "style": cfg.get("style", "machine"),
+        "style": style,
+        "titleSize": fit_title(cfg.get("title", ""), st),
+        "episode": int(cfg.get("episode", 1)),
         "title": cfg.get("title", ""),
         "site": cfg.get("site", ""),
         "info": [fill(x, cfg) for x in cfg.get("info", [])],

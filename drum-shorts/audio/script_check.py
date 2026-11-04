@@ -17,11 +17,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from textfit import (CAPTION_MAX_W, CTA_MAX_W, Metrics,  # noqa: E402
-                     fit_caption, fit_cta, plain)
+from textfit import Metrics, fit_caption, fit_cta, plain, style_of  # noqa: E402
 
-TITLE_SIZE, TITLE_MAX = 118, 700
-INFO_SIZE, INFO_MAX = 27, 680
 READ_LIMIT = 7.0  # 초당 글자 수(공백·기호 제외) 이상이면 주의
 
 SUB_NAMES = ["정박", "이", "앤", "어"]  # 한 박 안의 16분음표 4개
@@ -126,11 +123,13 @@ def check_line(metrics, text, size, limit, what):
 
 def run_checks(tl, metrics):
     tracks = {t["id"]: t for t in tl["tracks"]}
+    st = style_of(tl.get("style", "tech"))
     global_res = []
-    r, _ = check_line(metrics, tl["title"], TITLE_SIZE, TITLE_MAX, "제목")
-    global_res += r
-    r, _ = check_line(metrics, "  |  ".join(tl["info"]), INFO_SIZE, INFO_MAX, "정보줄")
-    global_res += r
+    miss = metrics.missing(tl["title"] + " ".join(tl["info"]))
+    if miss:
+        global_res.append((ERR, f"제목/정보줄에 폰트에 없는 글자가 있어요: {' '.join(miss)}"))
+    if tl.get("titleSize") and st.get("title") and tl["titleSize"] < st["title"] * 0.7:
+        global_res.append((WARN, f"제목이 길어서 글자가 많이 작아져요 ({st['title']}px → {tl['titleSize']}px)"))
 
     scenes = []
     for sc in tl["scenes"]:
@@ -139,13 +138,13 @@ def run_checks(tl, metrics):
         lines = sc["cta"] or (sc["caption"] or "").split("\n")
         if any(l.strip() for l in lines):
             if sc["cta"]:
-                sizes = fit_cta(metrics, lines)
-                base = [38] + [27] * (len(lines) - 1)
-                limit = CTA_MAX_W
+                sizes = fit_cta(metrics, lines, st)
+                base = [st["cta"][0]] + [st["cta"][1]] * (len(lines) - 1)
+                limit = st["cta_w"]
             else:
-                sizes = [fit_caption(metrics, lines)] * len(lines)
-                base = [40] * len(lines)
-                limit = CAPTION_MAX_W
+                sizes = [fit_caption(metrics, lines, st)] * len(lines)
+                base = [st["caption"]] * len(lines)
+                limit = st["caption_w"]
             over = False
             for line, size in zip(lines, sizes):
                 r, w = check_line(metrics, line, size, limit, "자막")
@@ -290,7 +289,7 @@ def main():
     # script_check.py <장르 폴더> <timeline.json> <출력 파일(.txt 또는 .html)> [캡처 폴더] [프레임들]
     gdir, tl_path, out = map(Path, sys.argv[1:4])
     tl = json.loads(tl_path.read_text(encoding="utf-8"))
-    metrics = Metrics()
+    metrics = Metrics(style_of(tl.get("style", "tech"))["font"], fallback="Jua-Regular.ttf")
     global_res, scenes = run_checks(tl, metrics)
     if out.suffix == ".html":
         cfg = json.loads((gdir / "config.json").read_text(encoding="utf-8"))

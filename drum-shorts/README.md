@@ -94,7 +94,8 @@ bash make.sh house
 
 | 항목 | 설명 | 예시 |
 |---|---|---|
-| `style` | 화면 컨셉: `"machine"`(드럼머신, 기본) 또는 `"classic"`(처음 버전) | `"machine"` |
+| `style` | 화면 컨셉: `"tech"`(각진 테크니컬, 기본) · `"machine"`(드럼머신) · `"classic"`(처음 버전) | `"tech"` |
+| `episode` | 오른쪽 위 "DRUM PATTERN 001" 번호 | `1` |
 | `title` | 큰 제목 | `"UK GARAGE"` |
 | `site` | 위쪽 배지 | `"paycollabo.com"` |
 | `bpm` | 템포 | `130` |
@@ -108,6 +109,7 @@ bash make.sh house
 
 | 항목 | 설명 |
 |---|---|
+| `tag` | 화면에 쓰는 짧은 영문 이름 (예: `KICK`). 위쪽 학습 단계 표시와 자막 카드 라벨에 쓰임 |
 | `bars` | 장면 길이(마디 수). BPM이 바뀌어도 박자에 맞춰 자동 계산 |
 | `start_bar` | 패턴의 몇 번째 마디부터 보여줄지 (기본 1) |
 | `play` | 소리 나는 악기. 빠진 악기는 화면에서 흐리게 표시 |
@@ -140,7 +142,7 @@ drum-shorts/
 ├─ genres/<장르>/      재료 + config.json  ← 여기만 바꾸면 됨
 ├─ audio/              Python: 미디 → 오디오 + 시간표
 ├─ video/              Remotion: 화면
-│  ├─ public/fonts/    주아·DotGothic16 폰트 (SIL Open Font License, 상업 이용 가능)
+│  ├─ public/fonts/    Inter Tight·JetBrains Mono·Noto Sans KR·주아·DotGothic16 (모두 SIL Open Font License, 상업 이용 가능)
 │  └─ public/brand/    페이콜라보 로고 (워드마크·아이콘)
 ├─ build.py            1→2→3단계 한 번에 실행
 ├─ setup.sh / make.sh / preview.sh

@@ -3,6 +3,7 @@ export type Track = {id: string; label: string; steps: Step[]};
 
 export type Scene = {
   name: string;
+  tag: string; // 화면에 쓰는 짧은 영문 이름 (예: KICK)
   start: number;
   end: number;
   bars: number;
@@ -30,7 +31,9 @@ export type Timeline = {
   swingMs: number;
   swingSec: number;
   barsInPattern: number;
-  style: 'machine' | 'classic';
+  style: 'tech' | 'machine' | 'classic';
+  titleSize?: number;
+  episode?: number;
   title: string;
   site: string;
   info: string[];
