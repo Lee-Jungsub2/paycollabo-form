@@ -30,6 +30,7 @@ export type Timeline = {
   swingMs: number;
   swingSec: number;
   barsInPattern: number;
+  style: 'machine' | 'classic';
   title: string;
   site: string;
   info: string[];

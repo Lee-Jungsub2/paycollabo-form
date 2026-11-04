@@ -220,6 +220,7 @@ def main():
         "bpm": bpm, "barSec": bar_sec, "stepSec": step_sec,
         "swingMs": float(cfg.get("swing_ms", 0)), "swingSec": swing_sec,
         "barsInPattern": bars_in_pattern,
+        "style": cfg.get("style", "machine"),
         "title": cfg.get("title", ""),
         "site": cfg.get("site", ""),
         "info": [fill(x, cfg) for x in cfg.get("info", [])],

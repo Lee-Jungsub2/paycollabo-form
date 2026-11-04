@@ -94,6 +94,7 @@ bash make.sh house
 
 | 항목 | 설명 | 예시 |
 |---|---|---|
+| `style` | 화면 컨셉: `"machine"`(드럼머신, 기본) 또는 `"classic"`(처음 버전) | `"machine"` |
 | `title` | 큰 제목 | `"UK GARAGE"` |
 | `site` | 위쪽 배지 | `"paycollabo.com"` |
 | `bpm` | 템포 | `130` |
@@ -139,7 +140,8 @@ drum-shorts/
 ├─ genres/<장르>/      재료 + config.json  ← 여기만 바꾸면 됨
 ├─ audio/              Python: 미디 → 오디오 + 시간표
 ├─ video/              Remotion: 화면
-│  └─ public/fonts/    주아 폰트 (SIL Open Font License, 상업 이용 가능)
+│  ├─ public/fonts/    주아·DotGothic16 폰트 (SIL Open Font License, 상업 이용 가능)
+│  └─ public/brand/    페이콜라보 로고 (워드마크·아이콘)
 ├─ build.py            1→2→3단계 한 번에 실행
 ├─ setup.sh / make.sh / preview.sh
 └─ output/             완성된 MP4

@@ -7,7 +7,7 @@ FONT = Path(__file__).resolve().parent.parent / "video" / "public" / "fonts" / "
 
 # 화면 크기 (video/src/Caption.tsx 와 같은 값)
 CAPTION_SIZE, CAPTION_MAX_W, CAPTION_MAX_H, LINE_H = 40, 640, 170, 1.3
-CTA_SIZES, CTA_MAX_W = (38, 27), 506
+CTA_SIZES, CTA_MAX_W = (38, 27), 458  # 아이콘 들어간 안내 박스 기준
 MIN_SIZE = 26
 
 
