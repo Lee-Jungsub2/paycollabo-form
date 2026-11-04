@@ -30,14 +30,14 @@ export const Caption: React.FC<{now: Now; theme: Theme}> = ({now, theme}) => {
         <div
           style={{
             background: theme.ctaBg, color: theme.ctaText, borderRadius: 16, width: 546,
-            padding: '18px 20px 16px', textAlign: 'center', lineHeight: 1.25,
+            padding: '18px 20px 16px', whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.25,
           }}
         >
-          <div style={{fontSize: 38}}>
+          <div style={{fontSize: scene.ctaSizes?.[0] ?? 38}}>
             <Line text={first} theme={theme} />
           </div>
           {rest.map((l, i) => (
-            <div key={i} style={{fontSize: 27}}>
+            <div key={i} style={{fontSize: scene.ctaSizes?.[i + 1] ?? 27}}>
               <Line text={l} theme={theme} />
             </div>
           ))}
@@ -48,7 +48,7 @@ export const Caption: React.FC<{now: Now; theme: Theme}> = ({now, theme}) => {
 
   if (!scene.caption) return null;
   return (
-    <div style={{...style, textAlign: 'center', fontSize: 40, lineHeight: 1.3, color: theme.ink}}>
+    <div style={{...style, textAlign: 'center', fontSize: scene.captionSize ?? 40, lineHeight: 1.3, color: theme.ink, whiteSpace: 'nowrap'}}>
       <div>
         {scene.caption.split('\n').map((l, i) => (
           <Line key={i} text={l} theme={theme} />

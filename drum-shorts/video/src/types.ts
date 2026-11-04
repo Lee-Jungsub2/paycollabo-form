@@ -14,6 +14,8 @@ export type Scene = {
   showSwingLabel: boolean;
   caption: string | null;
   cta: string[] | null;
+  captionSize: number | null; // Python이 글자 폭에 맞춰 계산한 크기
+  ctaSizes: number[] | null;
 };
 
 export type Timeline = {

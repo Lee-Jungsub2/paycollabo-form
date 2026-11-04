@@ -15,6 +15,9 @@ import mido
 import numpy as np
 import soundfile as sf
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from textfit import Metrics, fit_caption, fit_cta  # noqa: E402
+
 SR = 48000
 FPS = 30
 WIDTH, HEIGHT = 720, 1280
@@ -150,6 +153,7 @@ def main():
 
     # 장면 → 시간표 + 이벤트
     scenes_out, events, t0 = [], [], 0.0
+    metrics = Metrics()
     max_progress = 0
     for i, sc in enumerate(cfg["scenes"]):
         bars = int(sc.get("bars", 1))
@@ -172,6 +176,8 @@ def main():
                         "time": round(t0 + b * bar_sec + s * step_sec + (swing_sec if swung else 0), 6),
                     })
         max_progress = max(max_progress, int(sc.get("progress", 0)))
+        caption = fill(sc.get("caption"), cfg)
+        cta = [fill(x, cfg) for x in sc["cta"]] if sc.get("cta") else None
         scenes_out.append({
             "name": sc.get("name", f"장면{i + 1}"),
             "start": round(t0, 6),
@@ -183,8 +189,10 @@ def main():
             "focus": sc.get("focus", []),
             "progress": int(sc.get("progress", 0)),
             "showSwingLabel": bool(sc.get("show_swing_label", False)),
-            "caption": fill(sc.get("caption"), cfg),
-            "cta": [fill(x, cfg) for x in sc["cta"]] if sc.get("cta") else None,
+            "caption": caption,
+            "cta": cta,
+            "captionSize": fit_caption(metrics, caption.split("\n")) if caption else None,
+            "ctaSizes": fit_cta(metrics, cta) if cta else None,
         })
         t0 += bars * bar_sec
 

@@ -16,14 +16,10 @@ import re
 import sys
 from pathlib import Path
 
-from fontTools.ttLib import TTFont
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from textfit import (CAPTION_MAX_W, CTA_MAX_W, Metrics,  # noqa: E402
+                     fit_caption, fit_cta, plain)
 
-ROOT = Path(__file__).resolve().parent.parent
-FONT = ROOT / "video" / "public" / "fonts" / "Jua-Regular.ttf"
-
-# 화면 위치·크기 (video/src 와 같은 값)
-CAPTION_SIZE, CAPTION_MAX = 40, 640
-CTA_SIZES, CTA_MAX = (38, 27), 506
 TITLE_SIZE, TITLE_MAX = 118, 700
 INFO_SIZE, INFO_MAX = 27, 680
 READ_LIMIT = 7.0  # 초당 글자 수(공백·기호 제외) 이상이면 주의
@@ -35,47 +31,34 @@ NEGATIVE = re.compile(r"비워|비어|비우|없|쉬")
 OK, WARN, ERR = "ok", "warn", "err"
 
 
-# ---------------------------------------------------------------- 글자 폭
-
-class Metrics:
-    def __init__(self, path):
-        f = TTFont(str(path))
-        self.cmap = f.getBestCmap()
-        self.hmtx = f["hmtx"]
-        self.upm = f["head"].unitsPerEm
-
-    def width(self, text, size):
-        w = 0
-        for ch in text:
-            g = self.cmap.get(ord(ch))
-            w += self.hmtx[g][0] if g else self.upm * 0.6
-        return w * size / self.upm
-
-    def missing(self, text):
-        return sorted({ch for ch in text if ch.strip() and ord(ch) not in self.cmap})
-
-
-def plain(text):
-    return text.replace("**", "")
-
-
 # ---------------------------------------------------------------- 미디 표현
 
 def pos_name(step):
     beat, sub = divmod(step % 16, 4)
-    return f"{beat + 1}박" if sub == 0 else f"{beat + 1}박의 {SUB_NAMES[sub]}"
+    return f"{beat + 1}박" if sub == 0 else f"{beat + 1}박 {sub + 1}번째 칸"
 
 
 def parse_positions(segment):
     """문장에서 박자 위치 뽑기 → (특정 위치 집합, 박 번호 없는 세부 위치 집합)"""
     seg = plain(segment)
     exact = set()
+    # "3박 세 번째 칸", "1박 첫 칸" (먼저 처리하고 문장에서 지움)
+    ORD = {"첫": 0, "두": 1, "세": 2, "네": 3}
+    def take_cell(m):
+        word = m.group(2)
+        sub = int(word) - 1 if word.isdigit() else ORD[word]
+        exact.add((int(m.group(1)) - 1) * 4 + sub)
+        return " "
+    seg = re.sub(r"([1-4])\s*박\s*(?:의\s*)?(첫|두|세|네|[1-4])\s*(?:번째)?\s*칸", take_cell, seg)
     for m in re.finditer(r"([1-4])\s*박(?:\s*의)?(?:\s*(정박|이|앤|어|아)(?![가-힣]*박))?", seg):
         beat = int(m.group(1)) - 1
         sub = SUB_ALIAS.get(m.group(2) or "정박", 0)
         exact.add(beat * 4 + sub)
     generic = set()
-    if not exact:
+    # 박 번호 없이 "3·4번째 칸" → 모든 박의 3·4번째 칸
+    for m in re.finditer(r"((?:[1-4]\s*[·,/]\s*)*[1-4])\s*번째\s*칸", seg):
+        generic.update(int(d) - 1 for d in re.findall(r"[1-4]", m.group(1)))
+    if not exact and not generic:
         toks = [re.sub(r"(이고|이랑|하고|과|와|에|은|는|을|를|도|만)$", "", t)
                 for t in re.split(r"[\s,.:;!?·'\"()]+", seg)]
         strong = [t for t in toks if t in ("앤", "어")]
@@ -107,7 +90,7 @@ def check_midi(caption, track, bars_in_pattern):
             found = [p for p in any_bar if p % 4 == sub]
             mentioned.update(found)
             if not found:
-                results.append((ERR, f"자막에는 '{SUB_NAMES[sub]}'이 있는데, 미디에는 그 위치에 {track['label']}가 없어요"))
+                results.append((ERR, f"자막에는 각 박의 {sub + 1}번째 칸('{SUB_NAMES[sub]}')이 있는데, 미디에는 그 위치에 {track['label']}가 없어요"))
     if mentioned and not any(r[0] == ERR for r in results):
         results.append((OK, "자막의 박자 표현이 미디와 맞아요"))
     extra = []
@@ -154,19 +137,27 @@ def run_checks(tl, metrics):
         res = []
         dur = sc["end"] - sc["start"]
         lines = sc["cta"] or (sc["caption"] or "").split("\n")
-        widths = []
-        for i, line in enumerate(lines):
+        if any(l.strip() for l in lines):
             if sc["cta"]:
-                size, limit = (CTA_SIZES[0] if i == 0 else CTA_SIZES[1]), CTA_MAX
+                sizes = fit_cta(metrics, lines)
+                base = [38] + [27] * (len(lines) - 1)
+                limit = CTA_MAX_W
             else:
-                size, limit = CAPTION_SIZE, CAPTION_MAX
-            r, w = check_line(metrics, line, size, limit, "자막")
-            res += r
-            widths.append(w / limit)
-        if not any(x[0] == ERR for x in res) and lines and any(l.strip() for l in lines):
-            res.append((OK, f"글자 폭 OK (가장 긴 줄 {max(widths) * 100:.0f}%)"))
-        if not sc["cta"] and len(lines) > 2:
-            res.append((WARN, f"자막이 {len(lines)}줄이에요. 2줄 이하를 추천해요"))
+                sizes = [fit_caption(metrics, lines)] * len(lines)
+                base = [40] * len(lines)
+                limit = CAPTION_MAX_W
+            over = False
+            for line, size in zip(lines, sizes):
+                r, w = check_line(metrics, line, size, limit, "자막")
+                res += r
+                over = over or bool(r)
+            if not over:
+                if sizes[0] < base[0]:
+                    res.append((WARN, f"줄이 길어서 글자가 작아져요 ({base[0]}px → {sizes[0]}px)"))
+                else:
+                    res.append((OK, "글자 크기 OK"))
+            if not sc["cta"] and len(lines) > 3:
+                res.append((WARN, f"자막이 {len(lines)}줄이에요. 3줄 이하를 추천해요"))
 
         chars = len(re.sub(r"[\s\W_]", "", plain(" ".join(lines))))
         cps = chars / dur if dur else 0
@@ -299,7 +290,7 @@ def main():
     # script_check.py <장르 폴더> <timeline.json> <출력 파일(.txt 또는 .html)> [캡처 폴더] [프레임들]
     gdir, tl_path, out = map(Path, sys.argv[1:4])
     tl = json.loads(tl_path.read_text(encoding="utf-8"))
-    metrics = Metrics(FONT)
+    metrics = Metrics()
     global_res, scenes = run_checks(tl, metrics)
     if out.suffix == ".html":
         cfg = json.loads((gdir / "config.json").read_text(encoding="utf-8"))
