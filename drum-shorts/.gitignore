@@ -1,0 +1,13 @@
+# 생성물
+output/
+video/public/render/
+video/node_modules/
+.venv/
+__pycache__/
+
+# 재료(미디·샘플·마스터)는 공개 저장소에 올리지 않음
+genres/**/*.wav
+genres/**/*.mid
+genres/**/*.midi
+genres/**/*.aif
+genres/**/*.aiff
