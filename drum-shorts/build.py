@@ -1,7 +1,8 @@
 """
 드럼 패턴 쇼츠 만들기 — 한 번에 실행
 
-  python3 build.py uk-garage
+  python3 build.py uk-garage            영상 만들기
+  python3 build.py uk-garage --script   대본 확인 화면 만들기
 
 1) audio/render_audio.py : 미디 + 원샷 → audio.wav, timeline.json
 2) Remotion             : timeline.json → 소리 없는 영상
@@ -26,6 +27,26 @@ def run(cmd, cwd=None):
         sys.exit(r.returncode)
 
 
+def make_script_check(genre, gdir, render_dir, out_dir):
+    """영상 대신 대본 확인 화면(html)을 만든다: 장면 캡처 + 자동 검사"""
+    print("\n[1/3] 시간표 만드는 중…")
+    run([sys.executable, ROOT / "audio" / "render_audio.py", gdir, render_dir])
+    tl = json.loads((render_dir / "timeline.json").read_text(encoding="utf-8"))
+    # 장면마다 첫 마디의 60% 지점(재생선이 가운데쯤) 한 장
+    frames = [min(int((sc["start"] + 0.6 * tl["barSec"]) * tl["fps"]), tl["durationInFrames"] - 1)
+              for sc in tl["scenes"]]
+    stills = out_dir / f".{genre}_stills"
+
+    print("\n[2/3] 장면 캡처 중…")
+    run(["node", "scripts/stills.mjs", genre, stills, ",".join(map(str, frames))], cwd=VIDEO)
+
+    print("\n[3/3] 대본 검사 중…")
+    html_out = out_dir / f"{genre}_대본확인.html"
+    run([sys.executable, ROOT / "audio" / "script_check.py", gdir, render_dir / "timeline.json",
+         stills, html_out, ",".join(map(str, frames))])
+    shutil.rmtree(stills, ignore_errors=True)
+
+
 def main():
     if len(sys.argv) < 2:
         genres = sorted(p.name for p in (ROOT / "genres").iterdir() if (p / "config.json").exists())
@@ -46,6 +67,10 @@ def main():
     out_dir.mkdir(exist_ok=True)
     silent = out_dir / f".{genre}_video.mp4"
     final = out_dir / f"{genre}.mp4"
+
+    if "--script" in sys.argv:
+        make_script_check(genre, gdir, render_dir, out_dir)
+        return
 
     print("\n[1/3] 오디오 만드는 중…")
     run([sys.executable, ROOT / "audio" / "render_audio.py", gdir, render_dir])
