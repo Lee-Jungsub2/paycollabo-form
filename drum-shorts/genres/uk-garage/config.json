@@ -1,0 +1,33 @@
+{
+  "style": "tech",
+  "episode": 1,
+  "title": "UK Garage",
+  "site": "paycollabo.com",
+  "bpm": 130,
+  "info": ["{bpm} BPM", "페이콜라보 개러지 킷"],
+  "swing_ms": 33,
+  "bars_in_pattern": 2,
+
+  "tracks": [
+    { "id": "kick",  "label": "Kick",  "midi": "kick.mid",  "sample": "kick.wav" },
+    { "id": "snare", "label": "Snare", "midi": "snare.mid", "sample": "snare.wav" },
+    { "id": "hat",   "label": "Hats",  "midi": "hat.mid",   "sample": "hat.wav" }
+  ],
+
+  "master": "master.wav",
+
+  "labels": {
+    "bar": "bar {n} of {total}",
+    "swing": "+{swing_ms}ms 늦게"
+  },
+
+  "scenes": [
+    {"name": "미리보기", "tag": "INTRO", "bars": 1, "start_bar": 2, "play": ["kick", "snare", "hat"], "swing": true, "caption": "UK 개러지 2스텝 리듬,\n한 줄씩 쉽게 찍어볼게요."},
+    {"name": "킥", "tag": "KICK", "bars": 2, "play": ["kick"], "focus": ["kick"], "progress": 1, "caption": "킥은 **1박 첫 칸**과 **3박 세 번째 칸**에!\n3박 정박을 비워두는 게 핵심이에요."},
+    {"name": "스네어", "tag": "SNARE", "bars": 1, "play": ["kick", "snare"], "focus": ["snare"], "progress": 2, "caption": "스네어는 **2박**과 **4박** 정박에 찍어주고요."},
+    {"name": "햇", "tag": "HATS", "bars": 1, "play": ["kick", "snare", "hat"], "focus": ["hat"], "progress": 3, "caption": "하이햇은 박자마다 **뒤쪽 두 칸**\n(3, 4번째 칸)에\n두 개씩 짝지어 찍어주세요."},
+    {"name": "스윙", "tag": "SWING", "bars": 2, "play": ["kick", "snare", "hat"], "swing": true, "focus": "swung", "show_swing_label": true, "progress": 4, "caption": "여기에 **셔플 ON!**\n짝수 번째 칸 노트들만 살짝(**{swing_ms}ms**)\n뒤로 밀어 리듬감을 살려요."},
+    {"name": "전체", "tag": "FULL", "bars": 2, "play": ["kick", "snare", "hat"], "swing": true, "caption": "다 합치면 **쫀득한**\n2스텝 개러지 비트 완성!"},
+    {"name": "마무리", "tag": "DM", "bars": 1, "play": ["kick", "snare", "hat"], "swing": true, "cta": ["댓글에 **드럼** 남겨주시면", "미디 파일과 드럼킷을 DM으로 보내드려요."]}
+  ]
+}
