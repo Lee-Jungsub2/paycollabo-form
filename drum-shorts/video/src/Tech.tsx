@@ -94,7 +94,7 @@ export const Tech: React.FC<{tl: Timeline; now: Now}> = ({tl, now}) => {
     ? Math.max(84, (scene.ctaSizes?.[0] ?? 30) * 1.4 + (scene.ctaSizes?.[1] ?? 21) * 1.45 * (capLines.length - 1))
     : capLines.length * capSize * 1.45;
   const capCardH = 64 + capBodyH + 26;
-  const CAP_Y = 776;
+  const CAP_Y = PANEL.y + panelH + 24; // 패널 바로 아래 (악기 수에 따라 내려감)
 
   // 칸 그리기 (SVG)
   const cells: React.ReactNode[] = [];
@@ -153,7 +153,7 @@ export const Tech: React.FC<{tl: Timeline; now: Now}> = ({tl, now}) => {
       {[40, 680].map((x) => (
         <div key={x} style={{position: 'absolute', left: x, top: 0, width: 1, height: 1280, background: TC.hair}} />
       ))}
-      {[86, 330, 756].map((y) => (
+      {[86, 330, PANEL.y + panelH + 4].map((y) => (
         <div key={y} style={{position: 'absolute', left: 0, top: y, width: 720, height: 1, background: TC.hair}} />
       ))}
 
@@ -192,7 +192,12 @@ export const Tech: React.FC<{tl: Timeline; now: Now}> = ({tl, now}) => {
         {tl.title}
       </div>
       <div style={{position: 'absolute', left: 40, top: 296, fontFamily: MONO, fontSize: 15, color: TC.muted, letterSpacing: 1, whiteSpace: 'nowrap'}}>
-        {tl.bpm} BPM <span style={{color: TC.accent}}>◆</span> SWING {tl.swingMs}MS
+        {tl.bpm} BPM
+        {tl.swingMs > 0 && (
+          <>
+            {' '}<span style={{color: TC.accent}}>◆</span> SWING {tl.swingMs}MS
+          </>
+        )}
         {kit && (
           <>
             {' '}<span style={{color: TC.accent}}>◆</span>{' '}

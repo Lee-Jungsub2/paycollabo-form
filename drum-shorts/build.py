@@ -19,6 +19,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 VIDEO = ROOT / "video"
 
+# 클라우드(Claude) 작업 공간에는 브라우저가 미리 설치돼 있음 → 자동으로 사용
+if not os.environ.get("REMOTION_BROWSER"):
+    import glob
+    found = sorted(glob.glob("/opt/pw-browsers/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell"))
+    if found:
+        os.environ["REMOTION_BROWSER"] = found[-1]
+
 
 def run(cmd, cwd=None):
     print("\n$ " + " ".join(str(c) for c in cmd))
