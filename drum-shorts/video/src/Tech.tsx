@@ -94,7 +94,8 @@ export const Tech: React.FC<{tl: Timeline; now: Now}> = ({tl, now}) => {
     ? Math.max(84, (scene.ctaSizes?.[0] ?? 30) * 1.4 + (scene.ctaSizes?.[1] ?? 21) * 1.45 * (capLines.length - 1))
     : capLines.length * capSize * 1.45;
   const capCardH = 64 + capBodyH + 26;
-  const CAP_Y = PANEL.y + panelH + 24; // 패널 바로 아래 (악기 수에 따라 내려감)
+  // 악기 3개: 승인된 시안 위치(776). 악기가 늘어 패널이 길어지면 패널 아래로 내려감
+  const CAP_Y = Math.max(776, PANEL.y + panelH + 24);
 
   // 칸 그리기 (SVG)
   const cells: React.ReactNode[] = [];
@@ -153,7 +154,7 @@ export const Tech: React.FC<{tl: Timeline; now: Now}> = ({tl, now}) => {
       {[40, 680].map((x) => (
         <div key={x} style={{position: 'absolute', left: x, top: 0, width: 1, height: 1280, background: TC.hair}} />
       ))}
-      {[86, 330, PANEL.y + panelH + 4].map((y) => (
+      {[86, 330, CAP_Y - 20].map((y) => (
         <div key={y} style={{position: 'absolute', left: 0, top: y, width: 720, height: 1, background: TC.hair}} />
       ))}
 
